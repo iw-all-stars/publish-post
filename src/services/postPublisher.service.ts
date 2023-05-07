@@ -1,32 +1,20 @@
 import { IgApiClient } from "instagram-private-api";
 import { decrypt } from "../utils/decrypt-password";
 import { readFileFromRemoteUrl } from "../utils/read_file_from_remote_url";
+import { Credentials, EventPublishPost, PlatformKeys, Post } from "..";
 
-type Credentials = {
-    username: string;
-    password: string;
-}
 
-enum PlatformKeys {
-    INSTAGRAM,
-    FACEBOOK, // not implemented
-    TIKTOK, // not implemented
-}
-
-type Post = {
-    url: string;
-    type: "image" | "video";
-    cover?: string;
-};
 
 export class PostPublisherService {
-    constructor(private readonly platformKey: PlatformKeys) {}
+    constructor() {}
 
-    async publishPost(credentials: Credentials, platformKey: PlatformKeys, posts: Post[]): Promise<void> {
-        switch (platformKey) {
+    async publishPost(event: EventPublishPost): Promise<void> {
+        switch (event.platformKey) {
             case PlatformKeys.INSTAGRAM:
-                const instagramPostPublisher = new InstagramPostPublisher(credentials);
-                await instagramPostPublisher.publishPost(posts);
+                const instagramPostPublisher = new InstagramPostPublisher(
+                    event.credentials
+                );
+                await instagramPostPublisher.publishPost(event.posts);
                 break;
             case PlatformKeys.FACEBOOK:
                 // TODO

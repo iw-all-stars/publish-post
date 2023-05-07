@@ -1,25 +1,36 @@
-import type {
-    APIGatewayProxyEventV2,
-    APIGatewayProxyStructuredResultV2,
-    Context,
-} from "aws-lambda";
+import { PostPublisherService } from "./services/postPublisher.service";
 
-// AWS Lambda Function Urls are reusing types from APIGateway
-// but many fields are not used or filled with default values
-// see: https://docs.aws.amazon.com/lambda/latest/dg/urls-invocation.html
-// It would be nice to have types with only the used fields and add them to:
-// https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/aws-lambda
-type LambdaFunctionUrlEvent = APIGatewayProxyEventV2;
-type LambdaFunctionUrlResult = APIGatewayProxyStructuredResultV2;
+export type Credentials = {
+    username: string;
+    password: string;
+};
 
-export async function handler(
-    event: LambdaFunctionUrlEvent,
-    context: Context
-): Promise<LambdaFunctionUrlResult> {
-    console.log(context.functionName);
-    console.log(event.body);
-    return {
-        statusCode: 200,
-        body: "Hello World i am a lambda function",
-    };
+export enum PlatformKeys {
+    INSTAGRAM,
+    FACEBOOK, // not implemented
+    TIKTOK, // not implemented
+}
+
+export type Post = {
+    url: string;
+    type: "image" | "video";
+    cover?: string;
+};
+
+export type EventPublishPost = {
+    credentials: Credentials;
+    platformKey: PlatformKeys;
+    posts: Post[];
+};
+
+export async function handler(event: EventPublishPost): Promise<boolean> {
+    try {
+        console.log("event >> : ", event);
+        const postPublisher = new PostPublisherService();
+        await postPublisher.publishPost(event);
+        return true;
+    } catch (e) {
+        console.log("[ERROR] : ", e);
+        return false;
+    }
 }
