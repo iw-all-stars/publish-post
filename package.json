@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "call-lambda": "ts-node examples/publish-post.ts"
+    "call-lambda": "ts-node examples/call-lambda.ts",
+    "publish-post": "ts-node examples/publish-post.ts"
   },
   "author": "",
   "license": "ISC",

@@ -21,6 +21,6 @@ export async function handler(
     console.log(event.body);
     return {
         statusCode: 200,
-        body: JSON.stringify(event, null, 2),
+        body: "Hello World i am a lambda function",
     };
 }
