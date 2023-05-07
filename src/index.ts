@@ -6,9 +6,9 @@ export type Credentials = {
 };
 
 export enum PlatformKeys {
-    INSTAGRAM,
-    FACEBOOK, // not implemented
-    TIKTOK, // not implemented
+    INSTAGRAM = "instagram",
+    FACEBOOK = "facebook", // not implemented
+    TIKTOK = "tiktok", // not implemented
 }
 
 export type Post = {
@@ -19,7 +19,7 @@ export type Post = {
 
 export type EventPublishPost = {
     credentials: Credentials;
-    platformKey: PlatformKeys;
+    platformKey: string;
     posts: Post[];
 };
 
