@@ -23,7 +23,7 @@ export type EventPublishPost = {
     posts: Post[];
 };
 
-export async function handler(event: EventPublishPost): Promise<boolean> {
+export async function handler(event: EventPublishPost): Promise<any> {
     try {
         console.log("event >> : ", event);
         const postPublisher = new PostPublisherService();
@@ -31,6 +31,6 @@ export async function handler(event: EventPublishPost): Promise<boolean> {
         return true;
     } catch (e) {
         console.log("[ERROR] : ", e);
-        return false;
+        return JSON.stringify(e);
     }
 }
