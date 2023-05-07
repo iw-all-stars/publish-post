@@ -17,7 +17,6 @@ export async function handler(
     context: Context
 ): Promise<LambdaFunctionUrlResult> {
     console.log(context.functionName);
-    console.log(`${event.requestContext.http.method} ${event.rawPath}`);
     console.log(event.body);
     return {
         statusCode: 200,
