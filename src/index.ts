@@ -19,7 +19,7 @@ export type Post = {
 
 export type EventPublishPost = {
     credentials: Credentials;
-    platformKey: string;
+    platformKey: PlatformKeys;
     posts: Post[];
 };
 
