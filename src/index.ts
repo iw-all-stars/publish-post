@@ -5,6 +5,6 @@ export async function handler(
 ): Promise<APIGatewayProxyResult> {
   return {
     statusCode: 200,
-    body: "Hello World",
+    body: "Hello World i am a lambda function",
   };
 }
