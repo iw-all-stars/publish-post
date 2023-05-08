@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc",
     "call-lambda": "ts-node examples/call-lambda.ts",
-    "publish-post": "ts-node examples/publish-post.ts"
+    "publish-post": "ts-node examples/publish-post.ts",
+    "event": "ts-node examples/event.ts"
   },
   "author": "",
   "license": "ISC",
@@ -16,10 +17,12 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
+    "@aws-sdk/client-scheduler": "^3.328.0",
     "aws-lambda": "^1.0.7",
     "aws-sdk": "^2.1373.0",
     "crypto-js": "^4.1.1",
     "dotenv": "^16.0.3",
-    "instagram-private-api": "^1.45.3"
+    "instagram-private-api": "^1.45.3",
+    "luxon": "^3.3.0"
   }
 }
