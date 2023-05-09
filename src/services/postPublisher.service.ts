@@ -44,7 +44,9 @@ class InstagramPostPublisher implements PostPublisher {
         ig.state.generateDevice(this.username);
         await ig.account.login(this.username, this.password);
 
-        for (const post of posts) {
+        const sortedPosts = posts.sort((a, b) => a.position - b.position);
+
+        for (const post of sortedPosts) {
             const file = await readFileFromRemoteUrl(post.url);
             switch (post.type) {
                 case "image":

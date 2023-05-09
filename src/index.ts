@@ -12,8 +12,11 @@ export enum PlatformKeys {
 }
 
 export type Post = {
+    id: string;
     url: string;
-    type: "image" | "video";
+    storyId: string;
+    position: number;
+    type: 'image' | 'video';
     cover?: string;
 };
 
