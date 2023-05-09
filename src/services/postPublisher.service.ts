@@ -3,8 +3,6 @@ import { decrypt } from "../utils/decrypt-password";
 import { readFileFromRemoteUrl } from "../utils/read_file_from_remote_url";
 import { Credentials, EventPublishPost, PlatformKeys, Post } from "..";
 
-
-
 export class PostPublisherService {
     constructor() {}
 
