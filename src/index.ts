@@ -16,24 +16,62 @@ export type Post = {
     url: string;
     storyId: string;
     position: number;
-    type: 'image' | 'video';
+    type: "image" | "video";
     cover?: string;
 };
 
 export type EventPublishPost = {
+    restaurantId: string;
+    organizationId: string;
     credentials: Credentials;
     platformKey: PlatformKeys;
     posts: Post[];
+    callbackUrl: string;
 };
 
+enum PublishPostState {
+    SUCCESS = "SUCCESS",
+    ERROR = "ERROR",
+}
+
 export async function handler(event: EventPublishPost): Promise<any> {
+    let details = '';
+    let state = null;
     try {
-        console.log("event >> : ", event);
+        console.info("[START_PUBLISH] : ", event);
         const postPublisher = new PostPublisherService();
         await postPublisher.publishPost(event);
-        return true;
+        state = PublishPostState.SUCCESS;
     } catch (e) {
-        console.log("[ERROR] : ", e);
-        return JSON.stringify(e);
+        console.error("[ERROR] : ", e);
+        state = PublishPostState.ERROR;
+        details = JSON.stringify(e);
+    } finally {
+        await callCallbackUrl(event, state, details);
+        console.info(`[END_PUBLISH] [STATUS=${state}] : `, event);
+        return;
     }
+}
+
+async function callCallbackUrl(
+    event: EventPublishPost,
+    state = "",
+    details = ""
+) {
+    await fetch(event.callbackUrl, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "api-key": process.env.API_KEY || "",
+        },
+        body: JSON.stringify({
+            event,
+            state,
+            details,
+        }),
+    })
+        .then(() => console.info(`[SUCCESS] : called ${event.callbackUrl}`))
+        .catch((e) =>
+            console.error(`[ERROR] : failed to call ${event.callbackUrl} `, e)
+        );
 }
