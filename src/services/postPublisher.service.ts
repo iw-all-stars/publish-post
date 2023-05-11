@@ -58,7 +58,7 @@ class InstagramPostPublisher implements PostPublisher {
                     const cover = await readFileFromRemoteUrl(
                         post.cover
                             ? post.cover
-                            : "https://challengesem2.s3.eu-west-3.amazonaws.com/cover/black_cover.jpg"
+                            : "https://challengesem2.s3.eu-west-3.amazonaws.com/assets/black_cover.jpg"
                     );
                     await ig.publish.story({
                         video: file,
