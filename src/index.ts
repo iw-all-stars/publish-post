@@ -11,12 +11,18 @@ export enum PlatformKeys {
     TIKTOK = "tiktok", // not implemented
 }
 
+export enum PostType {
+    IMAGE = "IMAGE",
+    VIDEO = "VIDEO",
+  }
+
 export type Post = {
     id: string;
-    url: string;
+    originalUrl: string;
+    convertedUrl: string;
     storyId: string;
     position: number;
-    type: "image" | "video";
+    type: PostType;
     cover?: string;
 };
 

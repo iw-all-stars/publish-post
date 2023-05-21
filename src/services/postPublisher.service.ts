@@ -1,7 +1,7 @@
 import { IgApiClient } from "instagram-private-api";
 import { decrypt } from "../utils/decrypt-password";
 import { readFileFromRemoteUrl } from "../utils/read_file_from_remote_url";
-import { Credentials, EventPublishPost, PlatformKeys, Post } from "..";
+import { Credentials, EventPublishPost, PlatformKeys, Post, PostType } from "..";
 
 export class PostPublisherService {
     constructor() {}
@@ -47,14 +47,14 @@ class InstagramPostPublisher implements PostPublisher {
         const sortedPosts = posts.sort((a, b) => a.position - b.position);
 
         for (const post of sortedPosts) {
-            const file = await readFileFromRemoteUrl(post.url);
+            const file = await readFileFromRemoteUrl(post.convertedUrl);
             switch (post.type) {
-                case "image":
+                case PostType.IMAGE:
                     await ig.publish.story({
                         file,
                     });
                     break;
-                case "video":
+                case PostType.VIDEO:
                     const cover = await readFileFromRemoteUrl(
                         post.cover
                             ? post.cover
