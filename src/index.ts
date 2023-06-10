@@ -59,7 +59,7 @@ async function updateStoryStatus(
     event: EventPublishPost,
     state: StoryStatus,
 ) {
-	prisma.story.update({
+	return prisma.story.update({
 		where: {
 			id: event.posts[0].storyId,
 		},
