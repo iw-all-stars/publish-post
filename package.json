@@ -23,6 +23,7 @@
     "crypto-js": "^4.1.1",
     "dotenv": "^16.0.3",
     "instagram-private-api": "^1.45.3",
-    "luxon": "^3.3.0"
+    "luxon": "^3.3.0",
+	"@prisma/client": "4.13.0"
   }
 }

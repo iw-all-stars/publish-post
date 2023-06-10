@@ -1,4 +1,7 @@
+import { PrismaClient, StoryStatus } from "@prisma/client";
 import { PostPublisherService } from "./services/postPublisher.service";
+
+const prisma = new PrismaClient();
 
 export type Credentials = {
     username: string;
@@ -35,49 +38,33 @@ export type EventPublishPost = {
     callbackUrl: string;
 };
 
-enum PublishPostState {
-    SUCCESS = "SUCCESS",
-    ERROR = "ERROR",
-}
-
 export async function handler(event: EventPublishPost): Promise<any> {
-    let details = '';
-    let state = null;
+    let status: StoryStatus
     try {
         console.info("[START_PUBLISH] : ", event);
         const postPublisher = new PostPublisherService();
         await postPublisher.publishPost(event);
-        state = PublishPostState.SUCCESS;
+        status = StoryStatus.PUBLISHED;
     } catch (e) {
         console.error("[ERROR] : ", e);
-        state = PublishPostState.ERROR;
-        details = JSON.stringify(e);
+        status = StoryStatus.ERROR;
     } finally {
-        await callCallbackUrl(event, state, details);
-        console.info(`[END_PUBLISH] [STATUS=${state}] : `, event);
+        await updateStoryStatus(event, status);
+        console.info(`[END_PUBLISH] [STATUS=${status}] : `, event);
         return;
     }
 }
 
-async function callCallbackUrl(
+async function updateStoryStatus(
     event: EventPublishPost,
-    state = "",
-    details = ""
+    state: StoryStatus,
 ) {
-    await fetch(event.callbackUrl, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "api-key": process.env.API_KEY || "",
-        },
-        body: JSON.stringify({
-            event,
-            state,
-            details,
-        }),
-    })
-        .then(() => console.info(`[SUCCESS] : called ${event.callbackUrl}`))
-        .catch((e) =>
-            console.error(`[ERROR] : failed to call ${event.callbackUrl} `, e)
-        );
+	prisma.story.update({
+		where: {
+			id: event.posts[0].storyId,
+		},
+		data: {
+			status: state,
+		}
+	})
 }

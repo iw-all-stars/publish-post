@@ -1,0 +1,212 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+
+model Campaign {
+    id           String       @id @default(uuid()) @db.Uuid
+    name         String
+    creatorId    String       @db.Uuid
+    restaurantId String       @db.Uuid
+    typeId       String       @db.Uuid
+    status       String
+    template     Int
+    subject      String
+    body         String
+    url          String
+    createdAt    DateTime     @default(now())
+    updatedAt    DateTime     @updatedAt
+    user         User         @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+    restaurant   Restaurant   @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+    type         CampaignType @relation(fields: [typeId], references: [id], onDelete: Cascade)
+    mail         Mail[]
+}
+
+model CampaignType {
+    id       String     @id @default(uuid()) @db.Uuid
+    name     String     @unique
+    color    String?    @default("gray.200")
+    Campaign Campaign[]
+}
+
+model Mail {
+    id         String   @id @default(uuid()) @db.Uuid
+    clientId   String   @db.Uuid
+    campaignId String   @db.Uuid
+    rate       Int?
+    opened     Boolean  @default(false)
+    unsub      Boolean  @default(false)
+    status     String
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+    client     Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+    campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+}
+
+model Client {
+    id        String    @id @default(uuid()) @db.Uuid
+    email     String    @unique
+    name      String
+    firstname String?
+    phone     String?
+    image     String?
+    address   String?
+    city      String?
+    state     String?
+    zip       String?
+    lastLogin DateTime?
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    Mail      Mail[]
+}
+
+model Category {
+    id    String  @id @default(uuid()) @db.Uuid
+    name  String  @unique
+    color String? @default("#000000")
+    icon  String? @default("🍔")
+}
+
+model Organization {
+    id          String  @id @default(uuid()) @db.Uuid
+    name        String
+    description String?
+
+    userId      String       @db.Uuid
+    user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+    restaurants Restaurant[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Restaurant {
+    id        String  @id @default(uuid()) @db.Uuid
+    name      String
+    category  String?
+    address   String?
+    latitude  Float?
+    longitude Float?
+    logo      String?
+
+    organizationId String       @db.Uuid
+    organization   Organization @relation(fields: [organizationId], references: [id])
+    campaigns      Campaign[]
+	platforms      Platform[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+// Necessary for Next auth
+model Account {
+    id                String  @id @default(uuid()) @db.Uuid
+    userId            String  @db.Uuid
+    type              String
+    provider          String
+    providerAccountId String
+    refresh_token     String? // @db.Text
+    access_token      String? // @db.Text
+    expires_at        Int?
+    token_type        String?
+    scope             String?
+    id_token          String? // @db.Text
+    session_state     String?
+    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([provider, providerAccountId])
+}
+
+model Session {
+    id           String   @id @default(uuid()) @db.Uuid
+    sessionToken String   @unique
+    userId       String   @db.Uuid
+    expires      DateTime
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+    id            String         @id @default(uuid()) @db.Uuid
+    name          String?
+    email         String?        @unique
+    emailVerified DateTime?
+    image         String?
+    lastLogin     DateTime?
+    createdAt     DateTime       @default(now())
+    updatedAt     DateTime       @updatedAt
+    accounts      Account[]
+    sessions      Session[]
+    Campaign      Campaign[]
+    Organization  Organization[]
+}
+
+model VerificationToken {
+    identifier String
+    token      String   @unique
+    expires    DateTime
+
+    @@unique([identifier, token])
+}
+
+enum StoryStatus {
+    PUBLISHED
+    DRAFT
+    SCHEDULED
+    ERROR
+    NOW
+}
+
+model Story {
+    id          String      @id @default(uuid()) @db.Uuid
+    name        String
+    publishedAt DateTime?
+    posts       Post[]
+    status      StoryStatus
+    createdAt     DateTime       @default(now())
+    updatedAt     DateTime       @updatedAt
+}
+
+enum PostType {
+  IMAGE
+  VIDEO
+}
+
+model Post {
+    id  String @id @default(uuid()) @db.Uuid
+    name String @db.Uuid @unique
+    originalUrl String
+    convertedUrl String?
+    story Story?  @relation(fields: [storyId], references: [id], onDelete: Cascade)
+    storyId String? @db.Uuid
+    position Int?
+    type PostType
+    createdAt     DateTime       @default(now())
+    updatedAt     DateTime       @updatedAt
+}
+
+enum PlatformKey {
+    TWITTER
+    INSTAGRAM
+    FACEBOOK
+	TIKTOK
+}
+
+model Platform {
+    id  String      @id @default(uuid()) @db.Uuid
+    key PlatformKey
+	login String
+	password String
+	
+	restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+	restaurantId String @db.Uuid
+
+    createdAt     DateTime       @default(now())
+    updatedAt     DateTime       @updatedAt
+}
