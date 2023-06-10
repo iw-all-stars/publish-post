@@ -1,9 +1,6 @@
 name: deploy to lambda
 on: [push]
 
-env:
-  NODE_PATH: "./:/opt/nodejs/node_modules"
-
 jobs:
     deploy_zip:
         name: deploy lambda function
@@ -18,7 +15,7 @@ jobs:
             - name: Install dependencies
               run: npm install
             - name: Build
-              run: npm run build
+              run: npx prisma generate && npm run build
             - name: Zip
               run:
                   cp -r node_modules dist/node_modules && zip -r function.zip
