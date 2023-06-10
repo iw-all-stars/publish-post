@@ -2,7 +2,7 @@ name: deploy to lambda
 on: [push]
 
 env:
-NODE_PATH: "./:/opt/nodejs/node_modules"
+	NODE_PATH: "./:/opt/nodejs/node_modules"
 
 jobs:
     deploy_zip:
