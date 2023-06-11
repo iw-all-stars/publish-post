@@ -43,7 +43,8 @@ export async function handler(event: EventPublishPost): Promise<any> {
     try {
         console.info("[START_PUBLISH] : ", event);
         const postPublisher = new PostPublisherService();
-        await postPublisher.publishPost(event);
+        const publishedPosts = await postPublisher.publishPost(event);
+		await setSocialIds(publishedPosts);
         status = StoryStatus.PUBLISHED;
     } catch (e) {
         console.error("[ERROR] : ", e);
@@ -67,4 +68,20 @@ async function updateStoryStatus(
 			status: state,
 		}
 	})
+}
+
+async function setSocialIds(publishedPosts: {
+    postId: string;
+    socialId: string;
+}[]) {
+	return Promise.all(publishedPosts.map((post) => 
+		 prisma.post.update({
+			where: {
+				id: post.postId,
+			},
+			data: {
+				socialPostId: post.socialId,
+			}
+		})
+	))
 }

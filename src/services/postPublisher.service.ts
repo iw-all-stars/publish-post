@@ -6,20 +6,19 @@ import { Credentials, EventPublishPost, PlatformKeys, Post, PostType } from ".."
 export class PostPublisherService {
     constructor() {}
 
-    async publishPost(event: EventPublishPost): Promise<void> {
+    async publishPost(event: EventPublishPost): Promise<{ postId: string, socialId: string }[]> {
         switch (event.platformKey) {
             case PlatformKeys.INSTAGRAM:
                 const instagramPostPublisher = new InstagramPostPublisher(
                     event.credentials
                 );
-                await instagramPostPublisher.publishPost(event.posts);
-                break;
-            case PlatformKeys.FACEBOOK:
-                // TODO
-                break;
-            case PlatformKeys.TIKTOK:
-                // TODO
-                break;
+                return instagramPostPublisher.publishPost(event.posts);
+            //case PlatformKeys.FACEBOOK:
+            //    // TODO
+            //    break;
+            //case PlatformKeys.TIKTOK:
+            //    // TODO
+            //    break;
             default:
                 throw new Error("Platform not supported");
         }
@@ -27,7 +26,7 @@ export class PostPublisherService {
 }
 
 interface PostPublisher {
-    publishPost(posts: Post[]): Promise<void>;
+    publishPost(posts: Post[]): Promise<{ postId: string, socialId: string }[]>;
 }
 
 class InstagramPostPublisher implements PostPublisher {
@@ -39,18 +38,20 @@ class InstagramPostPublisher implements PostPublisher {
         this.password = decrypt(credentials.password);
     }
 
-    async publishPost(posts: Post[]): Promise<void> {
+    async publishPost(posts: Post[]): Promise<{ postId: string, socialId: string }[]> {
         const ig = new IgApiClient();
         ig.state.generateDevice(this.username);
         await ig.account.login(this.username, this.password);
 
         const sortedPosts = posts.sort((a, b) => a.position - b.position);
 
+		const socialPostids: { postId: string, socialId: string }[] = []
         for (const post of sortedPosts) {
             const file = await readFileFromRemoteUrl(post.convertedUrl);
+			let res = null
             switch (post.type) {
                 case PostType.IMAGE:
-                    await ig.publish.story({
+                    res = await ig.publish.story({
                         file,
                     });
                     break;
@@ -60,7 +61,7 @@ class InstagramPostPublisher implements PostPublisher {
                             ? post.cover
                             : "https://challengesem2.s3.eu-west-3.amazonaws.com/assets/black_cover.jpg"
                     );
-                    await ig.publish.story({
+                    res = await ig.publish.story({
                         video: file,
                         coverImage: cover,
                     });
@@ -68,6 +69,11 @@ class InstagramPostPublisher implements PostPublisher {
                 default:
                     throw new Error("Post type not supported");
             }
+			socialPostids.push({ 
+				postId: post.id,
+				socialId: res.media.pk
+			 })
         }
+		return socialPostids
     }
 }
