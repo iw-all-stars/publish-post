@@ -18,12 +18,13 @@
   },
   "dependencies": {
     "@aws-sdk/client-scheduler": "^3.328.0",
+    "@prisma/client": "4.13.0",
+    "@sendinblue/client": "^3.3.1",
     "aws-lambda": "^1.0.7",
     "aws-sdk": "^2.1373.0",
     "crypto-js": "^4.1.1",
     "dotenv": "^16.0.3",
     "instagram-private-api": "^1.45.3",
-    "luxon": "^3.3.0",
-	"@prisma/client": "4.13.0"
+    "luxon": "^3.3.0"
   }
 }

@@ -1,42 +1,8 @@
-import { PrismaClient, StoryStatus } from "@prisma/client";
+import { StoryStatus } from "@prisma/client";
+import { sendEmail } from "./services/mail.service";
 import { PostPublisherService } from "./services/postPublisher.service";
-
-const prisma = new PrismaClient();
-
-export type Credentials = {
-    username: string;
-    password: string;
-};
-
-export enum PlatformKeys {
-    INSTAGRAM = "instagram",
-    FACEBOOK = "facebook", // not implemented
-    TIKTOK = "tiktok", // not implemented
-}
-
-export enum PostType {
-    IMAGE = "IMAGE",
-    VIDEO = "VIDEO",
-  }
-
-export type Post = {
-    id: string;
-    originalUrl: string;
-    convertedUrl: string;
-    storyId: string;
-    position: number;
-    type: PostType;
-    cover?: string;
-};
-
-export type EventPublishPost = {
-    restaurantId: string;
-    organizationId: string;
-    credentials: Credentials;
-    platformKey: PlatformKeys;
-    posts: Post[];
-    callbackUrl: string;
-};
+import { setSocialIds, updateStoryStatus } from "./services/status.service";
+import { EventPublishPost } from "./utils/types";
 
 export async function handler(event: EventPublishPost): Promise<any> {
     let status: StoryStatus
@@ -51,37 +17,8 @@ export async function handler(event: EventPublishPost): Promise<any> {
         status = StoryStatus.ERROR;
     } finally {
         await updateStoryStatus(event, status);
+		await sendEmail(event, status);
         console.info(`[END_PUBLISH] [STATUS=${status}] : `, event);
         return;
     }
-}
-
-async function updateStoryStatus(
-    event: EventPublishPost,
-    state: StoryStatus,
-) {
-	return prisma.story.update({
-		where: {
-			id: event.posts[0].storyId,
-		},
-		data: {
-			status: state,
-		}
-	})
-}
-
-async function setSocialIds(publishedPosts: {
-    postId: string;
-    socialId: string;
-}[]) {
-	return Promise.all(publishedPosts.map((post) => 
-		 prisma.post.update({
-			where: {
-				id: post.postId,
-			},
-			data: {
-				socialPostId: post.socialId,
-			}
-		})
-	))
 }

@@ -1,14 +1,15 @@
 import { IgApiClient } from "instagram-private-api";
 import { decrypt } from "../utils/decrypt-password";
 import { readFileFromRemoteUrl } from "../utils/read_file_from_remote_url";
-import { Credentials, EventPublishPost, PlatformKeys, Post, PostType } from "..";
+import { Credentials, EventPost, EventPublishPost } from "../utils/types";
+import { PlatformKey, Post, PostType } from "@prisma/client";
 
 export class PostPublisherService {
     constructor() {}
 
     async publishPost(event: EventPublishPost): Promise<{ postId: string, socialId: string }[]> {
         switch (event.platformKey) {
-            case PlatformKeys.INSTAGRAM:
+            case PlatformKey.INSTAGRAM:
                 const instagramPostPublisher = new InstagramPostPublisher(
                     event.credentials
                 );
@@ -38,7 +39,7 @@ class InstagramPostPublisher implements PostPublisher {
         this.password = decrypt(credentials.password);
     }
 
-    async publishPost(posts: Post[]): Promise<{ postId: string, socialId: string }[]> {
+    async publishPost(posts: EventPost[]): Promise<{ postId: string, socialId: string }[]> {
         const ig = new IgApiClient();
         ig.state.generateDevice(this.username);
         await ig.account.login(this.username, this.password);
