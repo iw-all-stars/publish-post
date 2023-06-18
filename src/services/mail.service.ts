@@ -40,7 +40,7 @@ export const sendEmail = async (
 
     switch (status) {
         case StoryStatus.PUBLISHED:
-            const instaLink = `https:///www.instagram.com/stories/${
+            const instaLink = `https://instagram.com/stories/${
                 event.credentials.username
             }/${story.posts[0]?.socialPostId ?? ""}`;
             return sendEmailSuccess(
@@ -68,7 +68,7 @@ const sendEmailSuccess = (
     return apiInstance
         .sendTransacEmail({
             to: [{ email: to }],
-            params: { name: storyName, link: "https://google.com" },
+            params: { name: storyName, link: linkToSeeStory },
             templateId: 4,
         })
         .then(
