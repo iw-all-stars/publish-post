@@ -49,7 +49,7 @@ export const sendEmail = async (
                 instaLink
             );
         case StoryStatus.ERROR:
-			const challengeAppLink = `${process.env.SENDINBLUE_API_KEY ?? "http://localhost:3000"}/dashboard/${organization.id}/restaurant/${event.restaurantId}/stories`
+			const challengeAppLink = `${process.env.FRONT_END_APP ?? "http://localhost:3000"}/dashboard/${organization.id}/restaurant/${event.restaurantId}/stories`
             return sendEmailError(
                 organization?.user?.email as string,
                 story.name,
