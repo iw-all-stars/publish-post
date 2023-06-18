@@ -64,6 +64,7 @@ class InstagramPostPublisher implements PostPublisher {
                     res = await ig.publish.story({
                         video: file,
                         coverImage: cover,
+						transcodeDelay: 60_000
                     });
                     break;
                 default:
