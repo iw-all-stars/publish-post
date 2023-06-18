@@ -68,7 +68,7 @@ const sendEmailSuccess = (
     return apiInstance
         .sendTransacEmail({
             to: [{ email: to }],
-            params: { name: storyName, link: linkToSeeStory },
+            params: { name: storyName, link: "https://google.com" },
             templateId: 4,
         })
         .then(
