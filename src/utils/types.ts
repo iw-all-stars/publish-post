@@ -16,6 +16,7 @@ export type EventPost = {
 };
 
 export type EventPublishPost = {
+    storyId: string;
     restaurantId: string;
     organizationId: string;
     credentials: Credentials;

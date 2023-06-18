@@ -10,38 +10,55 @@ apiInstance.setApiKey(
     process.env.SENDINBLUE_API_KEY as string
 );
 
-export const sendEmail = async (event: EventPublishPost, status: StoryStatus) => {
+export const sendEmail = async (
+    event: EventPublishPost,
+    status: StoryStatus
+) => {
+    const organization = await prisma.organization.findUnique({
+        where: {
+            id: event.organizationId,
+        },
+        include: {
+            user: {
+                select: {
+                    email: true,
+                },
+            },
+        },
+    });
 
-	const result = await prisma.organization.findUnique({
-		where: {
-			id: event.organizationId
-		},
-		include: {
-			user: {
-				select: {
-					email: true
-				}
-			}
-		}
-	})
+    const story = await prisma.story.findUnique({
+        where: {
+            id: event.storyId,
+        },
+        include: {
+            posts: {
+                take: 1,
+            },
+        },
+    });
 
-	switch (status) {
-		case StoryStatus.PUBLISHED:
-			return sendEmailSuccess(
-				result?.user?.email as string,
-				event.organizationId,
-				"https://www.google.com"
-			)
-		case StoryStatus.ERROR:
-			return sendEmailError(
-				result?.user?.email as string,
-				event.organizationId,
-				"https://www.google.com"
-			)
-		default:
-			break;
-	}
-}
+    switch (status) {
+        case StoryStatus.PUBLISHED:
+            const instaLink = `https:///www.instagram.com/stories/${
+                event.credentials.username
+            }/${story.posts[0]?.socialPostId ?? ""}`;
+            return sendEmailSuccess(
+                organization?.user?.email as string,
+                story.name,
+                instaLink
+            );
+        case StoryStatus.ERROR:
+			const challengeAppLink = `${process.env.SENDINBLUE_API_KEY ?? "http://localhost:3000"}/dashboard/${organization.id}/restaurant/${event.restaurantId}/stories`
+            return sendEmailError(
+                organization?.user?.email as string,
+                story.name,
+                challengeAppLink
+            );
+        default:
+            break;
+    }
+};
 
 const sendEmailSuccess = (
     to: string,
@@ -66,11 +83,7 @@ const sendEmailSuccess = (
         );
 };
 
-const sendEmailError = (
-    to: string,
-    storyName: string,
-    linkToGoApp: string
-) => {
+const sendEmailError = (to: string, storyName: string, linkToGoApp: string) => {
     return apiInstance
         .sendTransacEmail({
             to: [{ email: to }],
