@@ -19,9 +19,9 @@ export const sendEmail = async (
             id: event.organizationId,
         },
         include: {
-            user: {
-                select: {
-                    email: true,
+            users: {
+                include: {
+                    user: true,
                 },
             },
         },
@@ -38,23 +38,34 @@ export const sendEmail = async (
         },
     });
 
+    const emailsUsers =
+        organization?.users?.map((userToOrga) => userToOrga.user.email) ?? [];
+
     switch (status) {
         case StoryStatus.PUBLISHED:
             const instaLink = `https://instagram.com/stories/${
                 event.credentials.username
             }/${story.posts[0]?.socialPostId ?? ""}`;
-            return sendEmailSuccess(
-                organization?.user?.email as string,
-                story.name,
-                instaLink
-            );
+            for (const email of emailsUsers) {
+                await sendEmailSuccess(
+                    email,
+                    story.name,
+                    instaLink
+                );
+            }
         case StoryStatus.ERROR:
-			const challengeAppLink = `${process.env.FRONT_END_APP ?? "http://localhost:3000"}/dashboard/${organization.id}/restaurant/${event.restaurantId}/stories`
-            return sendEmailError(
-                organization?.user?.email as string,
-                story.name,
-                challengeAppLink
-            );
+            const challengeAppLink = `${
+                process.env.FRONT_END_APP ?? "http://localhost:3000"
+            }/dashboard/${organization.id}/restaurant/${
+                event.restaurantId
+            }/stories`;
+			for (const email of emailsUsers) {
+				await sendEmailError(
+					email,
+					story.name,
+					challengeAppLink
+				);
+			}
         default:
             break;
     }
