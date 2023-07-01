@@ -53,6 +53,7 @@ export const sendEmail = async (
                     instaLink
                 );
             }
+			break;
         case StoryStatus.ERROR:
             const challengeAppLink = `${
                 process.env.FRONT_END_APP ?? "http://localhost:3000"
@@ -66,6 +67,7 @@ export const sendEmail = async (
 					challengeAppLink
 				);
 			}
+			break;
         default:
             break;
     }
